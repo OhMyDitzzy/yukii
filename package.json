@@ -1,0 +1,29 @@
+{
+  "name": "yukii",
+  "version": "1.0.0",
+  "description": "Lightweight WhatsApp bot script using Baileys + TypeScript",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node dist/index.js"
+  },
+  "keywords": [
+    "bot",
+    "whatsapp"
+  ],
+  "author": "DitzDev",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^24.7.0",
+    "@types/yargs": "^17.0.33",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "baileys": "npm:@yupra/baileys@^2.0.2",
+    "chalk": "^5.6.2",
+    "chokidar": "^4.0.3",
+    "lowdb": "^7.0.1",
+    "moment-timezone": "^0.6.0",
+    "yargs": "^18.0.0"
+  }
+}
