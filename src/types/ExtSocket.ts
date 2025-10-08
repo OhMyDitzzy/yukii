@@ -4,7 +4,9 @@ import { FileExtension } from "file-type";
 export interface SerializeSocket extends WASocket {
     chats?: Record<string, any>;
     getFile?: (path: any, saveToFile?: boolean) => Promise<PromisesGetFile>;
+    getJid?: (sender: string) => any;
     isLid?: Record<string, any>;
+    waitEvent?: (eventName: any, is?: () => boolean, maxTries?: number) => Promise<unknown>;
 }
 
 interface PromisesGetFile {

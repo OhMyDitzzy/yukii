@@ -95,7 +95,22 @@ export function _makeWASocket(config: UserFacingSocketConfig): SerializeSocket {
                 return sender;
             }
         },
-        
+
+        waitEvent: {
+            value(eventName, is = () => true, maxTries = 25) {
+                return new Promise((resolve, reject) => {
+                    let tries = 0;
+                    let on = (...args: any[]) => {
+                        if (++tries > maxTries) reject("Max tries reached");
+                        else if (is()) {
+                            conn.ev.off(eventName, on);
+                            resolve([...args])
+                        }
+                    };
+                    conn.ev.on(eventName, on)
+                });
+            }
+        },
     })
 
     return sock;
