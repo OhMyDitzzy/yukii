@@ -40,21 +40,21 @@ export function _makeWASocket(config: UserFacingSocketConfig): SerializeSocket {
         getFile: {
             async value(PATH, saveToFile = false) {
                 let res, filename;
-                const data = Buffer.isBuffer(PATH) 
-                ? PATH
-                : PATH instanceof ArrayBuffer
-                ? Buffer.from(PATH) 
-                : /^data:.*?\/.*?;base64,/i.test(PATH)
-                ? Buffer.from(PATH.split`,`[1], "base64")
-                : /^https?:\/\//.test(PATH)
-                ? await(res = await fetch(PATH)).arrayBuffer()
-                : fs.existsSync(PATH)
-                ? ((filename = PATH), fs.readFileSync(PATH))
-                : typeof PATH === "string"
-                ? PATH
-                : Buffer.alloc(0);
+                const data = Buffer.isBuffer(PATH)
+                    ? PATH
+                    : PATH instanceof ArrayBuffer
+                        ? Buffer.from(PATH)
+                        : /^data:.*?\/.*?;base64,/i.test(PATH)
+                            ? Buffer.from(PATH.split`,`[1], "base64")
+                            : /^https?:\/\//.test(PATH)
+                                ? await (res = await fetch(PATH)).arrayBuffer()
+                                : fs.existsSync(PATH)
+                                    ? ((filename = PATH), fs.readFileSync(PATH))
+                                    : typeof PATH === "string"
+                                        ? PATH
+                                        : Buffer.alloc(0);
 
-                if (!Buffer.isBuffer(data)) 
+                if (!Buffer.isBuffer(data))
                     throw new Error("Result is not a buffer.")
 
                 const type = (await fileTypeFromBuffer(data)) || {
@@ -62,8 +62,8 @@ export function _makeWASocket(config: UserFacingSocketConfig): SerializeSocket {
                     ext: ".bin"
                 }
 
-                if (data && saveToFile && !filename) 
-                   (filename = path.join(import.meta.dirname, "../tmp" + <any>new Date() * 1 + "." + type.ext)), await fs.promises.writeFile(filename, data);
+                if (data && saveToFile && !filename)
+                    (filename = path.join(import.meta.dirname, "../tmp" + <any>new Date() * 1 + "." + type.ext)), await fs.promises.writeFile(filename, data);
 
                 return {
                     res,
@@ -111,6 +111,51 @@ export function _makeWASocket(config: UserFacingSocketConfig): SerializeSocket {
                 });
             }
         },
+
+        sendFile: {
+            async value(
+                jid,
+                path,
+                filename = "",
+                caption = "",
+                quoted,
+                ptt = false,
+                options: any = {}
+            ) {
+                let type = await conn.getFile!(path, true);
+                let { res, data: file, filename: pathFile } = type;
+                if ((res && res.status !== 200) || file.length <= 65536) {
+                    try {
+                        throw { json: JSON.parse(file.toString()) };
+                    } catch (e: any) {
+                        if (e.json) throw e.json;
+                        else throw e
+                    }
+                }
+                const fileSize = fs.statSync(pathFile).size / 1024 / 1024;
+                if (fileSize >= 100) throw new Error("File size is too big.");
+                let opt = {
+                    quoted
+                };
+                if (quoted) opt.quoted = quoted
+                if (!type) options.asDocument = true;
+                let mtype = "", 
+                  mimetype = options.mimetype || type.mime, 
+                  convert: any;
+
+                if (
+                    /webp/.test(type.mime as unknown as string) ||
+                    (/image/.test(type.mime as unknown as string) && options.asSticker)
+                ) mtype = "sticker";
+
+                else if (
+                    /image/.test(type.mime as unknown as string) ||
+                    (/webp/.test(type.mime as unknown as string) && options.asImage)
+                ) mtype = "image";
+                else if (/video/.test(type.mime as unknown as string)) mtype = "video";
+                else if (/audio/.test(type.mime as unknown as string)) mtype = "audio";
+            }
+        }
     })
 
     return sock;
