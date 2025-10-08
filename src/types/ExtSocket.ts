@@ -2,7 +2,7 @@ import { WASocket } from "baileys";
 import { FileExtension } from "file-type";
 
 export interface SerializeSocket extends WASocket {
-    chats?: Record<string, any>;
+    chats?: Record<any, any>;
     getFile?: (path: any, saveToFile?: boolean) => Promise<PromisesGetFile>;
     getJid?: (sender: string) => any;
     isLid?: Record<string, any>;

@@ -84,7 +84,7 @@ export function _makeWASocket(config: UserFacingSocketConfig): SerializeSocket {
                 if (conn.isLid[sender]) return conn.isLid[sender];
                 if (sender.endsWith("@lid")) return sender;
 
-                for (let chat of Object.values(conn.chats)) {
+                for (let chat of Object.values(conn.chats || {})) {
                     if (!chat.metadata?.participants) continue;
                     let user = chat.metadata?.participants.find(p => p.lid === sender || p.id === sender)
                     if (user) {
