@@ -22,6 +22,7 @@
     "baileys": "npm:@yupra/baileys@^2.0.2",
     "chalk": "^5.6.2",
     "chokidar": "^4.0.3",
+    "file-type": "^17.1.1",
     "lowdb": "^7.0.1",
     "moment-timezone": "^0.6.0",
     "yargs": "^18.0.0"
