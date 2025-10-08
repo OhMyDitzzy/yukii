@@ -35,6 +35,7 @@ async function imageToWebp(media: any) {
     const buff = fs.readFileSync(tmpOut);
     fs.unlinkSync(tmpOut)
     fs.unlinkSync(tmpIn)
+    return buff;
 }
 
 
