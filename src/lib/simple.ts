@@ -5,6 +5,7 @@ import { format } from "util";
 import fs from "fs";
 import { fileTypeFromBuffer } from "file-type";
 import path from "path";
+import { toAudio } from "./exif";
 
 export function _makeWASocket(config: UserFacingSocketConfig): SerializeSocket {
     let conn = makeWASocket(config) as SerializeSocket;
@@ -139,9 +140,9 @@ export function _makeWASocket(config: UserFacingSocketConfig): SerializeSocket {
                 };
                 if (quoted) opt.quoted = quoted
                 if (!type) options.asDocument = true;
-                let mtype = "", 
-                  mimetype = options.mimetype || type.mime, 
-                  convert: any;
+                let mtype = "",
+                    mimetype = options.mimetype || type.mime,
+                    convert: any;
 
                 if (
                     /webp/.test(type.mime as unknown as string) ||
@@ -153,8 +154,46 @@ export function _makeWASocket(config: UserFacingSocketConfig): SerializeSocket {
                     (/webp/.test(type.mime as unknown as string) && options.asImage)
                 ) mtype = "image";
                 else if (/video/.test(type.mime as unknown as string)) mtype = "video";
-                else if (/audio/.test(type.mime as unknown as string)) mtype = "audio";
-            }
+                else if (/audio/.test(type.mime as unknown as string))
+                    (convert = await toAudio(file, type.ext)),
+                        (file = convert.data),
+                        (pathFile = convert.filename),
+                        (mtype = "audio"),
+                        (mimetype = options.mimetype || "audio/ogg;codecs=opus");
+                else mtype = "document";
+                if (options.asDocument) mtype = "document";
+
+                delete options.asSticker;
+                delete options.asLocation;
+                delete options.asVideo;
+                delete options.asDocument;
+                delete options.asImage;
+
+                let message = {
+                    ...options,
+                    caption,
+                    ptt,
+                    [mtype]: { url: pathFile },
+                    mimetype,
+                    fileName: filename || pathFile.split("/").pop(),
+                };
+
+                let m;
+                try {
+                    m = await conn.sendMessage(jid, message, { ...opt, ...options })
+                } catch (e) {
+                    console.error(e);
+                    m = null
+                } finally {
+                    if (!m)
+                        m = await conn.sendMessage(jid, { ...message, [mtype]: file },
+                            { ...opt, ...options }
+                        );
+                        file = null as any;
+                        return m;
+                }
+            },
+            enumerable: true
         }
     })
 

@@ -13,6 +13,16 @@ function randomNumber(min: number, max: any = null) {
     }
 }
 
+function toAudio(buffer, ext) {
+    return ffmpeg(buffer, [
+        "-vn",
+        "-c:a", "libopus",
+        "-b:a", "128k",
+        "-vbr", "on",
+        "compression_level", "10"
+    // @ts-ignore
+    ], ext, "mp3")
+}
 
 async function imageToWebp(media: any) {
     const tmpOut = path.join(tmpdir());
@@ -33,10 +43,10 @@ async function imageToWebp(media: any) {
     });
 
     const buff = fs.readFileSync(tmpOut);
-    fs.unlinkSync(tmpOut)
-    fs.unlinkSync(tmpIn)
+    fs.unlinkSync(tmpOut);
+    fs.unlinkSync(tmpIn);
     return buff;
 }
 
 
-export { imageToWebp };
+export { imageToWebp, toAudio };
